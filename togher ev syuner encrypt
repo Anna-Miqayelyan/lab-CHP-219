@@ -1,0 +1,68 @@
+#include <iostream>
+#include <cstring>
+
+class SentenceArray {
+private:
+    static const int MAX_WORDS = 100;
+    static const int MAX_WORD_LENGTH = 50;
+    char words[MAX_WORDS][MAX_WORD_LENGTH];
+    int wordCount;
+
+public:
+    SentenceArray(const char* sentence) {
+        wordCount = 0;
+        char* token = strtok(const_cast<char*>(sentence), " ");
+
+        while (token != nullptr && wordCount < MAX_WORDS) {
+            strncpy(words[wordCount], token, MAX_WORD_LENGTH);
+            words[wordCount][MAX_WORD_LENGTH - 1] = '\0';
+            wordCount++;
+            token = strtok(nullptr, " ");
+        }
+    }
+
+    void printColumns(int columns) {
+        int maxLength = 0;
+        for (int i = 0; i < wordCount; ++i) {
+            int length = strlen(words[i]);
+            if (length > maxLength) {
+                maxLength = length;
+            }
+        }
+
+        std::string columnOutput;
+
+        for (int row = 0; row < maxLength; ++row) {
+            for (int col = 0; col < columns; ++col) {
+                int index = col * maxLength + row;
+                if (index < wordCount) {
+                    if (row < strlen(words[index])) {
+                        std::cout << words[index][row];
+                        columnOutput += words[index][row];
+                    } else {
+                        std::cout << " ";
+                        columnOutput += ' ';
+                    }
+                } else {
+                    std::cout << " ";
+                    columnOutput += ' ';
+                }
+                std::cout << " ";
+            }
+            std::cout << "\n";
+        }
+
+        std::cout << "\nColumn characters: " << columnOutput << "\n";
+    }
+};
+
+int main() {
+    char sentence[] = "my name is Anna";
+
+    SentenceArray sentenceArray(sentence);
+    int columns = 3;
+
+    sentenceArray.printColumns(columns);
+
+    return 0;
+}
