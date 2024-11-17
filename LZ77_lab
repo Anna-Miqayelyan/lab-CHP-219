@@ -1,0 +1,98 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+class LZ77Data {
+public:
+    int offset;  
+    int length; 
+    char nextChar; 
+
+    LZ77Data(int offset, int length, char nextChar)
+        : offset(offset), length(length), nextChar(nextChar) {}
+};
+
+vector<LZ77Data> lz77_compress(const string& input, int window_size, int lookahead_size) {
+    vector<LZ77Data> compressed_data;
+    int n = input.length();
+    int i = 0;
+
+    while (i < n) {
+        int search_buffer_start = max(0, i - window_size);
+        int search_buffer_end = i - 1;
+
+        int lookahead_buffer_end = min(i + lookahead_size, n);
+
+        int longest_match_length = 0;
+        int match_offset = 0;
+
+        for (int j = search_buffer_start; j <= search_buffer_end; ++j) {
+            int k = i;
+            int length = 0;
+
+            while (k < lookahead_buffer_end && input[j + length] == input[k]) {
+                length++;
+                k++;
+            }
+
+            if (length > longest_match_length) {
+                longest_match_length = length;
+                match_offset = i - j;
+            }
+        }
+
+        if (longest_match_length > 0) {
+            compressed_data.push_back(LZ77Data(match_offset, longest_match_length, input[i + longest_match_length]));
+            i += longest_match_length + 1; 
+        } else {
+            compressed_data.push_back(LZ77Data(0, 0, input[i]));
+            i++;
+        }
+    }
+
+    return compressed_data;
+}
+
+string lz77_decompress(const vector<LZ77Data>& compressed_data) {
+    string decompressed_data;
+
+    for (const auto& entry : compressed_data) {
+        int offset = entry.offset;
+        int length = entry.length;
+        char nextChar = entry.nextChar;
+
+        if (offset == 0 && length == 0) {
+            decompressed_data += nextChar;
+        } else {
+            int start = decompressed_data.length() - offset;
+            for (int i = 0; i < length; ++i) {
+                decompressed_data += decompressed_data[start + i];
+            }
+            decompressed_data += nextChar;
+        }
+    }
+
+    return decompressed_data;
+}
+
+int main() {
+    string input = "ABABABABABABA";
+    int window_size = 6; 
+    int lookahead_size = 4; 
+
+    vector<LZ77Data> compressed_data = lz77_compress(input, window_size, lookahead_size);
+
+    cout << "Compressed Data (offset, length, next char):" << endl;
+    for (const auto& entry : compressed_data) {
+        cout << "(" << entry.offset << ", " << entry.length << ", '" << entry.nextChar << "')" << endl;
+    }
+
+    string decompressed_data = lz77_decompress(compressed_data);
+
+    cout << "\nDecompressed Data: " << decompressed_data << endl;
+
+    return 0;
+}
