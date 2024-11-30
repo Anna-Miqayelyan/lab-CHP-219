@@ -1,0 +1,66 @@
+# Infinite loop for menu
+while ($true) {
+    Write-Host "=== Menu ==="
+    Write-Host "1. Display device's IPv4 and IPv6 addresses"
+    Write-Host "2. Network route (traceroute) to a specified hostname/URL"
+    Write-Host "3. Display IP address of a specified hostname/URL"
+    Write-Host "4. Encrypt a file or entered text"
+    Write-Host "5. Decrypt a file or entered text"
+    Write-Host "6. Compress a file or entered text"
+    Write-Host "7. Decompress a file or entered text"
+    Write-Host "8. Calculate the hash value of a file"
+    Write-Host "9. Exit"
+    $choice = Read-Host "Select an option (1-9)"
+
+    switch ($choice) {
+        1 {
+            Write-Host "=== IPv4 and IPv6 Addresses ==="
+            Get-NetIPAddress | Select-Object -Property IPAddress
+        }
+        2 {
+            $hostname = Read-Host "Enter hostname or URL for traceroute"
+            tracert $hostname
+        }
+        3 {
+            $hostname = Read-Host "Enter hostname or URL"
+            $ip = [System.Net.Dns]::GetHostAddresses($hostname) | ForEach-Object { $_.IPAddressToString }
+            Write-Host "IP Address: $ip"
+        }
+        4 {
+            $input = Read-Host "Enter text to encrypt"
+            $encrypted = ConvertTo-SecureString $input -AsPlainText -Force | ConvertFrom-SecureString
+            $encrypted | Out-File -FilePath "encrypted.txt"
+            Write-Host "Encrypted text saved to encrypted.txt"
+        }
+        5 {
+            $file = Read-Host "Enter the encrypted file name (default: encrypted.txt)"
+            if (-not $file) { $file = "encrypted.txt" }
+            $encryptedText = Get-Content -Path $file
+            $decrypted = ConvertTo-SecureString $encryptedText | ConvertFrom-SecureString -AsPlainText
+            $decrypted | Out-File -FilePath "decrypted.txt"
+            Write-Host "Decrypted text saved to decrypted.txt"
+        }
+        6 {
+            $file = Read-Host "Enter file name to compress"
+            Compress-Archive -Path $file -DestinationPath "$file.zip"
+            Write-Host "File compressed to $file.zip"
+        }
+        7 {
+            $file = Read-Host "Enter the compressed file name to decompress (e.g., file.zip)"
+            Expand-Archive -Path $file -DestinationPath . -Force
+            Write-Host "File decompressed to current directory"
+        }
+        8 {
+            $file = Read-Host "Enter the file name to calculate hash"
+            $hash = Get-FileHash -Path $file -Algorithm SHA256
+            Write-Host "SHA256 Hash: $($hash.Hash)"
+        }
+        9 {
+            Write-Host "Exiting..."
+            break
+        }
+        default {
+            Write-Host "Invalid option. Please select again."
+        }
+    }
+}
