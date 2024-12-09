@@ -1,0 +1,17 @@
+# Ignore build directories and generated files
+build/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+
+# Ignore IDE-specific files (Visual Studio, Eclipse, etc.)
+.vscode/
+.idea/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Windows executables and debug files
+*.exe
+*.pdb
