@@ -1,0 +1,43 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <chrono>
+
+using namespace std;
+
+atomic<bool> quitnow(false);
+int globlint = 0;
+mutex lock;
+
+void MyThreadFunction() {
+    while (!quitnow) {
+        lock.lock();
+        globlint++;
+        if (globlint > 100) {
+            quitnow = true;
+        }
+        cout << "MyThreadFunction: " << globlint << endl;
+        lock.unlock();
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+}
+
+int main() {
+    thread myThread(MyThreadFunction);
+
+    while (!quitnow) {
+        lock.lock();
+        globlint++;
+        if (globlint > 500) {
+            quitnow = true;
+        }
+        cout << "Main thread: " << globlint << endl;
+        lock.unlock();
+        this_thread::sleep_for(chrono::milliseconds(20));
+    }
+
+    myThread.join();
+    cout << "Program finished." << endl;
+    return 0;
+}
